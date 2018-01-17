@@ -652,7 +652,10 @@
   	callbacks: {},
 
   	// The storage module to use for reordering tests
-  	storage: localSessionStorage
+  	storage: localSessionStorage,
+
+  	// Number of attempts to retry failed test
+  	retryAttempts: 5
   };
 
   // take a predefined QUnit.config and extend the defaults
@@ -1341,6 +1344,7 @@
   	this.stack = sourceFromStacktrace(3);
   	this.steps = [];
   	this.timeout = undefined;
+  	this.remainAttempts = config.retryAttempts;
 
   	// If a module is skipped, all its tests and the tests of the child suites
   	// should be treated as skipped even if they are defined as `only` or `todo`.
@@ -1582,6 +1586,15 @@
   				config.stats.bad++;
   				module.stats.bad++;
   			}
+  		}
+
+  		// Restart test on fail
+  		if (bad && this.remainAttempts) {
+  			this.remainAttempts--;
+  			this.assertions = [];
+  			this.steps = [];
+  			this.queue();
+  			return;
   		}
 
   		notifyTestsRan(module, skipped);
