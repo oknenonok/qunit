@@ -392,7 +392,7 @@ export function escapeText( s ) {
 			addEvent( document, "keydown", hideHandler );
 
 			// Hide on Escape keydown or outside-container click
-			function hideHandler( e )  {
+			function hideHandler( e ) {
 				var inContainer = moduleFilter.contains( e.target );
 
 				if ( e.keyCode === 27 || !inContainer ) {
@@ -980,4 +980,8 @@ export function escapeText( s ) {
 		return ret;
 	};
 
+	// Listen for unhandled rejections, and call QUnit.onUnhandledRejection
+	window.addEventListener( "unhandledrejection", function( event ) {
+		QUnit.onUnhandledRejection( event.reason );
+	} );
 }() );

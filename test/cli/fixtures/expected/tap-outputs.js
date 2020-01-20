@@ -1,3 +1,5 @@
+"use strict";
+
 // Expected outputs from the TapReporter for the commands run in CLI tests
 module.exports = {
 	"qunit":
@@ -89,6 +91,38 @@ Available custom reporters from dependencies are: npm-reporter
 	/* eslint-disable max-len */
 	"qunit hanging-test": `Error: Process exited before tests finished running
 Last test to run (hanging) has an async hold. Ensure all assert.async() callbacks are invoked and Promises resolve. You should also set a standard timeout via QUnit.config.testTimeout.
-`
+`,
 	/* eslint-enable max-len */
+	"qunit unhandled-rejection.js":
+`TAP version 13
+not ok 1 Unhandled Rejections > test passes just fine, but has a rejected promise
+  ---
+  message: "Error thrown in non-returned promise!"
+  severity: failed
+  actual: {
+  "message": "Error thrown in non-returned promise!",
+  "stack": "Error: Error thrown in non-returned promise!\\n    at /some/path/wherever/unhandled-rejection.js:13:11"
+}
+  expected: undefined
+  stack: Error: Error thrown in non-returned promise!
+    at /some/path/wherever/unhandled-rejection.js:13:11
+  ...
+not ok 2 global failure
+  ---
+  message: "outside of a test context"
+  severity: failed
+  actual: {
+  "message": "outside of a test context",
+  "stack": "Error: outside of a test context\\n    at Object.<anonymous> (/some/path/wherever/unhandled-rejection.js:20:18)"
+}
+  expected: undefined
+  stack: Error: outside of a test context
+    at Object.<anonymous> (/some/path/wherever/unhandled-rejection.js:20:18)
+  ...
+1..2
+# pass 0
+# skip 0
+# todo 0
+# fail 2
+`
 };

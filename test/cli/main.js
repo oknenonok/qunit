@@ -105,6 +105,22 @@ QUnit.module( "CLI Main", function() {
 		}
 	} ) );
 
+	QUnit.test( "unhandled rejections fail tests", co.wrap( function* ( assert ) {
+		const command = "qunit unhandled-rejection.js";
+
+		try {
+			const result = yield execute( command );
+			assert.pushResult( {
+				result: false,
+				actual: result.stdout
+			} );
+		} catch ( e ) {
+			assert.equal( e.code, 1 );
+			assert.equal( e.stderr, "" );
+			assert.equal( e.stdout, expectedOutput[ command ] );
+		}
+	} ) );
+
 	QUnit.module( "filter", function() {
 		QUnit.test( "can properly filter tests", co.wrap( function* ( assert ) {
 			const command = "qunit --filter 'single' test single.js 'glob/**/*-test.js'";
@@ -125,6 +141,23 @@ QUnit.module( "CLI Main", function() {
 			assert.equal( execution.code, 0 );
 			assert.equal( execution.stderr, "" );
 			assert.equal( execution.stdout, expectedOutput[ command ] );
+		} ) );
+	} );
+
+	QUnit.module( "notrycatch", function() {
+		QUnit.test( "errors if notrycatch is used and a rejection occurs", co.wrap( function* ( assert ) {
+			assert.expect( 1 );
+
+			try {
+				yield execute( "qunit notrycatch/returns-rejection.js" );
+			} catch ( e ) {
+				assert.pushResult( {
+
+					// only in stdout due to using `console.log` in manual `unhandledRejection` handler
+					result: e.stdout.indexOf( "Unhandled Rejection: bad things happen sometimes" ) > -1,
+					actual: e.stdout + "\n" + e.stderr
+				} );
+			}
 		} ) );
 	} );
 } );

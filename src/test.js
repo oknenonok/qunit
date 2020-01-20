@@ -410,7 +410,7 @@ Test.prototype = {
 
 	pushResult: function( resultInfo ) {
 		if ( this !== config.current ) {
-			throw new Error( "Assertion occured after test had finished." );
+			throw new Error( "Assertion occurred after test had finished." );
 		}
 
 		// Destructure of resultInfo = { result, actual, expected, message, negative }
@@ -489,23 +489,27 @@ Test.prototype = {
 			then = promise.then;
 			if ( objectType( then ) === "function" ) {
 				resume = internalStop( test );
-				then.call(
-					promise,
-					function() { resume(); },
-					function( error ) {
-						message = "Promise rejected " +
-							( !phase ? "during" : phase.replace( /Each$/, "" ) ) +
-							" \"" + test.testName + "\": " +
-							( ( error && error.message ) || error );
-						test.pushFailure( message, extractStacktrace( error, 0 ) );
+				if ( config.notrycatch ) {
+					then.call( promise, function() { resume(); } );
+				} else {
+					then.call(
+						promise,
+						function() { resume(); },
+						function( error ) {
+							message = "Promise rejected " +
+								( !phase ? "during" : phase.replace( /Each$/, "" ) ) +
+								" \"" + test.testName + "\": " +
+								( ( error && error.message ) || error );
+							test.pushFailure( message, extractStacktrace( error, 0 ) );
 
-						// Else next test will carry the responsibility
-						saveGlobal();
+							// Else next test will carry the responsibility
+							saveGlobal();
 
-						// Unblock
-						resume();
-					}
-				);
+							// Unblock
+							resume();
+						}
+					);
+				}
 			}
 		}
 	},
@@ -785,7 +789,7 @@ function internalStart( test ) {
 			}
 
 			begin();
-		}, 13 );
+		} );
 	} else {
 		begin();
 	}
@@ -797,7 +801,7 @@ function collectTests( module ) {
 
 	// Do a breadth-first traversal of the child modules
 	while ( modules.length ) {
-		const nextModule =  modules.shift();
+		const nextModule = modules.shift();
 		tests.push.apply( tests, nextModule.tests );
 		modules.push( ...nextModule.childModules );
 	}
